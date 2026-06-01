@@ -1,0 +1,151 @@
+# 操作符重载（Operator Overloading）
+
+操作符重载是指**为自定义类型重新定义运算符的行为**，让自定义的类也能像内置类型一样使用 `+`、`-`、`==` 等运算符。
+
+---
+
+## 为什么需要操作符重载？
+
+```cpp
+int a = 1, b = 2;
+cout << a + b;  // 内置类型，+ 天然支持
+
+// 如果自定义一个向量类：
+Vector v1(1, 2), v2(3, 4);
+cout << v1 + v2;  // ❌ 编译器不知道两个 Vector 怎么相加
+```
+
+有了操作符重载，就可以让 `v1 + v2` 像数字相加一样自然。
+
+---
+
+## 基本语法
+
+```cpp
+返回类型 operator运算符(参数) {
+    // 定义运算逻辑
+}
+```
+
+---
+
+## 示例一：重载 `+`（加法）
+
+```cpp
+class Vector {
+public:
+    double x, y;
+    Vector(double x, double y) : x(x), y(y) {}
+
+    // 重载 +
+    Vector operator+(const Vector& other) const {
+        return Vector(x + other.x, y + other.y);
+    }
+};
+
+int main() {
+    Vector v1(1, 2), v2(3, 4);
+    Vector v3 = v1 + v2;       // 等价于 v1.operator+(v2)
+    cout << v3.x << ", " << v3.y;  // 输出 4, 6
+}
+```
+
+---
+
+## 示例二：重载 `==`（判断相等）
+
+```cpp
+class Point {
+public:
+    int x, y;
+    Point(int x, int y) : x(x), y(y) {}
+
+    bool operator==(const Point& other) const {
+        return x == other.x && y == other.y;
+    }
+};
+
+int main() {
+    Point p1(1, 2), p2(1, 2), p3(3, 4);
+    cout << (p1 == p2);  // 输出 1（true）
+    cout << (p1 == p3);  // 输出 0（false）
+}
+```
+
+---
+
+## 示例三：重载 `<<`（输出流，方便打印）
+
+```cpp
+#include <iostream>
+using namespace std;
+
+class Point {
+public:
+    int x, y;
+    Point(int x, int y) : x(x), y(y) {}
+
+    // 用友元函数重载 
+    friend ostream& operator<<(ostream& os, const Point& p) {
+        os << "(" << p.x << ", " << p.y << ")";
+        return os;
+    }
+};
+
+int main() {
+    Point p(3, 5);
+    cout << p;  // 输出 (3, 5)，像内置类型一样自然
+}
+```
+
+---
+
+## 示例四：重载 `[]`（下标访问）
+
+```cpp
+class MyArray {
+    int data[10];
+public:
+    int& operator[](int index) {
+        return data[index];
+    }
+};
+
+int main() {
+    MyArray arr;
+    arr[0] = 42;       // 像普通数组一样使用
+    cout << arr[0];    // 输出 42
+}
+```
+
+---
+
+## ⚠️ 注意事项
+
+**不能重载的运算符：**
+
+| 运算符 | 名称 |
+|--------|------|
+| `::`   | 作用域解析 |
+| `?:`   | 三目运算符 |
+| `.`    | 成员访问 |
+| `sizeof` | 大小 |
+
+**重载的原则：**
+- 不能改变运算符的**优先级和结合性**
+- 不能改变运算符的**操作数个数**（`+` 永远是二元）
+- 重载要符合**直觉**，不要让 `+` 做减法这种反常识的事
+
+---
+
+## 总结
+
+| 运算符 | 典型用途 |
+|--------|---------|
+| `+` `-` `*` `/` | 数学类（向量、矩阵、复数） |
+| `==` `!=` `<` `>` | 比较、排序 |
+| `<<` `>>` | 配合 cout/cin 打印输入 |
+| `[]` | 自定义容器的下标访问 |
+| `=` | 赋值（深拷贝） |
+
+> 操作符重载让自定义类型用起来像内置类型一样自然，是 C++ 面向对象的重要特性之一。
